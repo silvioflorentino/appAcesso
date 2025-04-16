@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from './Firebase';
 
 const LoginScreen = ({ navigation }) => {
@@ -17,14 +17,42 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
+  const handlePasswordReset = async () => {
+    if (!email) {
+      Alert.alert('Atenção', 'Informe seu email para recuperar a senha.');
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      Alert.alert('Sucesso', 'Email de recuperação enviado. Verifique sua caixa de entrada.');
+    } catch (err) {
+      Alert.alert('Erro', 'Não foi possível enviar o email de recuperação.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text>Login</Text>
-      <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} />
-      <TextInput style={styles.input} placeholder="Senha" secureTextEntry value={password} onChangeText={setPassword} />
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Senha"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Button title="Entrar" onPress={handleLogin} />
       <Button title="Cadastrar" onPress={() => navigation.navigate('Registro')} />
+      <Button title="Esqueci a senha" onPress={handlePasswordReset} />
     </View>
   );
 };
